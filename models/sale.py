@@ -9,7 +9,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_is_zero, float_compare
 
 class SaleOrder(models.Model):
-    _name = "sale.order"
+    _inherit = "sale.order"
 
 def _create_invoices(self, grouped=False, final=False):
     """
