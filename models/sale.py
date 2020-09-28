@@ -12,6 +12,51 @@ from odoo.tools import float_is_zero, float_compare
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    def _prepare_invoice_line_for_period(self):
+        """
+        Prepare the dict of values to create the new invoice line for a sales order line.
+        :param qty: float quantity to invoice
+        """
+        self.ensure_one()
+
+        period_start = self.env.context.get('invoice_period_start')
+        period_end = self.env.context.get('invoice_period_end')
+        timesheet_domain = [
+            '&',
+            ('so_line', 'in', self.order_line.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and
+                                                                   sol.product_id.service_type == 'timesheet')),
+            '&',
+            ('timesheet_invoice_id', '=', False),
+            ('project_id', '!=', False)
+        ]
+        if period_start and period_end:
+            timesheet_domain += [
+                '&',
+                ('date', '>=', period_start), ('date', '<=', period_end)
+            ]
+        timesheets = self.env['account.analytic.line'].search(timesheet_domain).sudo()
+        duration_list = []
+        for timesheet in timesheets:
+            duration_list.append(timesheet.unit_amount)
+
+        res = {
+            'display_type': self.display_type,
+            'sequence': self.sequence,
+            'name': self.name,
+            'product_id': self.product_id.id,
+            'product_uom_id': self.product_uom.id,
+            'quantity': sum(duration_list) or self.qty_to_invoice,
+            'discount': self.discount,
+            'price_unit': self.price_unit,
+            'tax_ids': [(6, 0, self.tax_id.ids)],
+            'analytic_account_id': self.order_id.analytic_account_id.id,
+            'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)],
+            'sale_line_ids': [(4, self.id)],
+        }
+        if self.display_type:
+            res['account_id'] = False
+        return res
+
     def _create_invoices_for_period(self, grouped=False, final=False):
         """
         Create the invoice associated to the SO.
@@ -20,6 +65,9 @@ class SaleOrder(models.Model):
         :param final: if True, refunds will be generated if necessary
         :returns: list of created invoices
         """
+        period_start = self.env.context.get('invoice_period_start')
+        period_end = self.env.context.get('invoice_period_end')
+
         if not self.env['account.move'].check_access_rights('create', False):
             try:
                 self.check_access_rights('write')
@@ -46,9 +94,14 @@ class SaleOrder(models.Model):
                     continue
                 if line.qty_to_invoice > 0 or (line.qty_to_invoice < 0 and final):
                     if pending_section:
-                        invoice_vals['invoice_line_ids'].append((0, 0, pending_section._prepare_invoice_line()))
+                        invoice_vals['invoice_line_ids'].append((0, 0, pending_section
+                                                                 .with_context(invoice_period_start=period_start,
+                                                                               invoice_period_end=period_end)
+                                                                 ._prepare_invoice_line_for_period()))
                         pending_section = None
-                    invoice_vals['invoice_line_ids'].append((0, 0, line._prepare_invoice_line()))
+                    invoice_vals['invoice_line_ids'].append((0, 0, line.with_context(invoice_period_start=period_start,
+                                                                                     invoice_period_end=period_end)
+                                                             ._prepare_invoice_line_for_period()))
 
             if not invoice_vals['invoice_line_ids']:
                 raise UserError(_('There is no invoiceable line. If a product has a Delivered quantities invoicing policy, please make sure that a quantity has been delivered.'))
@@ -83,9 +136,6 @@ class SaleOrder(models.Model):
                 })
                 new_invoice_vals_list.append(ref_invoice_vals)
             invoice_vals_list = new_invoice_vals_list
-
-        period_start = self.env.context.get('invoice_period_start')
-        period_end = self.env.context.get('invoice_period_end')
 
         # 3) Create invoices.
         # Manage the creation of invoices in sudo because a salesperson must be able to generate an invoice from a
