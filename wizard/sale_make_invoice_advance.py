@@ -27,8 +27,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
         invoice_vals = self._prepare_invoice_values(order, name, amount, so_line)
 
-        period_start = self.default_get(['period_start']).get('period_start')
-        period_end = self.default_get(['period_end']).get('period_end')
+        period_start = self.period_start
+        period_end = self.period_end
 
         if order.fiscal_position_id:
             invoice_vals['fiscal_position_id'] = order.fiscal_position_id.id
