@@ -27,13 +27,10 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
         invoice_vals = self._prepare_invoice_values(order, name, amount, so_line)
 
-        period_start = self.period_start
-        period_end = self.period_end
-
         if order.fiscal_position_id:
             invoice_vals['fiscal_position_id'] = order.fiscal_position_id.id
         invoice = self.env['account.move']\
-            .with_context({'invoice_period_start': period_start, 'invoice_period_end': period_end})\
+            .with_context({'invoice_period_start': self.period_start, 'invoice_period_end': self.period_end})\
             .sudo().create(invoice_vals).with_user(self.env.uid)
         invoice.message_post_with_view('mail.message_origin_link',
                                        values={'self': invoice, 'origin': order},
@@ -42,11 +39,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
     def create_invoices(self):
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
-        period_start = self.period_start
-        period_end = self.period_end
 
         if self.advance_payment_method == 'delivered':
-            sale_orders.with_context({'invoice_period_start': period_start, 'invoice_period_end': period_end})\
+            sale_orders.with_context({'invoice_period_start': self.period_start, 'invoice_period_end': self.period_end})\
                 ._create_invoices(final=self.deduct_down_payments)
         else:
             # Create deposit product if necessary
