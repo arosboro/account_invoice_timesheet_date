@@ -39,9 +39,6 @@ class SaleOrderLine(models.Model):
         for timesheet in timesheets:
             duration_list.append(timesheet.unit_amount)
 
-class SaleOrder(models.Model):
-    _inherit = "sale.order"
-
         res = {
             'display_type': self.display_type,
             'sequence': self.sequence,
@@ -59,6 +56,10 @@ class SaleOrder(models.Model):
         if self.display_type:
             res['account_id'] = False
         return res
+
+
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
 
     def _create_invoices_for_period(self, grouped=False, final=False):
         """
