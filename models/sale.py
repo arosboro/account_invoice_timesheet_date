@@ -24,7 +24,7 @@ class SaleOrderLine(models.Model):
         timesheet_domain = [
             '&',
             ('so_line', 'in', self.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and
-                                                                   sol.product_id.service_type == 'timesheet')),
+                                                                   sol.product_id.service_type == 'timesheet').ids),
             '&',
             ('timesheet_invoice_id', '=', False),
             ('project_id', '!=', False)
