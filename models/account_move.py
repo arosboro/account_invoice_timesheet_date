@@ -4,13 +4,6 @@
 from odoo import api, fields, models, _
 
 
-class AccountMove(models.Model):
-    _inherit = 'account.move'
-
-    period_start = fields.Datetime()
-    period_end = fields.Datetime()
-
-
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
