@@ -11,9 +11,7 @@ This module contains modifications to the common features of Sales Management an
     """,
     'depends': ['sale'],
     'data': [
-
         'wizard/sale_make_invoice_advance_views.xml',
-
     ],
     'demo': [],
     'qweb': [],

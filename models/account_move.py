@@ -10,6 +10,7 @@ class AccountMove(models.Model):
     period_start = fields.Datetime()
     period_end = fields.Datetime()
 
+
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
