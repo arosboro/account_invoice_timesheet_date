@@ -2,10 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
+import logging
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
+_logger = logging.getLogger(__name__)
 
 class SaleAdvancePaymentInv(models.TransientModel):
     _inherit = "sale.advance.payment.inv"
@@ -94,8 +96,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
             'campaign_id': order.campaign_id.id,
             'medium_id': order.medium_id.id,
             'source_id': order.source_id.id,
-            'period_start': self.period_start,
-            'period_end': self.period_end,
+            'period_start': self.default_get(['period_start']).get('period_start'),
+            'period_end': self.default_get(['period_end']).get('period_end'),
             'invoice_line_ids': [(0, 0, {
                 'name': name,
                 'price_unit': amount,
@@ -108,6 +110,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
                 'analytic_account_id': order.analytic_account_id.id or False,
             })],
         }
+
+        _logger.info("account.move - Period start %s, Period end %s", (invoice_vals['period_start'],
+                                                                       invoice_vals['period_end']))
 
         return invoice_vals
 
