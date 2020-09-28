@@ -23,7 +23,7 @@ class SaleOrderLine(models.Model):
         period_end = self.env.context.get('invoice_period_end')
         timesheet_domain = [
             '&',
-            ('so_line', 'in', self.order_line.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and
+            ('so_line', 'in', self.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and
                                                                    sol.product_id.service_type == 'timesheet')),
             '&',
             ('timesheet_invoice_id', '=', False),
