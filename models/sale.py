@@ -9,8 +9,8 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_is_zero, float_compare
 
 
-class SaleOrder(models.Model):
-    _inherit = "sale.order"
+class SaleOrderLine(models.Model):
+    _inherit = "sale.order.line"
 
     def _prepare_invoice_line_for_period(self):
         """
@@ -38,6 +38,9 @@ class SaleOrder(models.Model):
         duration_list = []
         for timesheet in timesheets:
             duration_list.append(timesheet.unit_amount)
+
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
 
         res = {
             'display_type': self.display_type,
