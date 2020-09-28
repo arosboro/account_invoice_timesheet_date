@@ -17,7 +17,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
     period_start = fields.Datetime()
     period_end = fields.Datetime()
 
-
     def _create_invoice_for_period(self, order, so_line, amount):
         if (self.advance_payment_method == 'percentage' and self.amount <= 0.00) or (
                 self.advance_payment_method == 'fixed' and self.fixed_amount <= 0.00):
@@ -29,8 +28,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
         if order.fiscal_position_id:
             invoice_vals['fiscal_position_id'] = order.fiscal_position_id.id
-        invoice = self.env['account.move']\
-            .with_context({'invoice_period_start': self.period_start, 'invoice_period_end': self.period_end})\
+        invoice = self.env['account.move'] \
+            .with_context(invoice_period_start=self.period_start, invoice_period_end=self.period_end) \
             .sudo().create(invoice_vals).with_user(self.env.uid)
         invoice.message_post_with_view('mail.message_origin_link',
                                        values={'self': invoice, 'origin': order},
@@ -41,7 +40,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
 
         if self.advance_payment_method == 'delivered':
-            sale_orders.with_context({'invoice_period_start': self.period_start, 'invoice_period_end': self.period_end})\
+            sale_orders.with_context(invoice_period_start=self.period_start, invoice_period_end=self.period_end) \
                 ._create_invoices(final=self.deduct_down_payments)
         else:
             # Create deposit product if necessary
