@@ -94,6 +94,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
             'campaign_id': order.campaign_id.id,
             'medium_id': order.medium_id.id,
             'source_id': order.source_id.id,
+            'period_start': self.period_start,
+            'period_end': self.period_end,
             'invoice_line_ids': [(0, 0, {
                 'name': name,
                 'price_unit': amount,
@@ -102,8 +104,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
                 'product_uom_id': so_line.product_uom.id,
                 'tax_ids': [(6, 0, so_line.tax_id.ids)],
                 'sale_line_ids': [(6, 0, [so_line.id])],
-                'analytic_tag_ids': [(6, 0, so_line.analytic_tag_ids.filtered(lambda at: self.period_start < at.date <=
-                                                                                         self.period_end).ids)],
+                'analytic_tag_ids': [(6, 0, so_line.analytic_tag_ids)],
                 'analytic_account_id': order.analytic_account_id.id or False,
             })],
         }
@@ -183,9 +184,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
                 context = {'lang': order.partner_id.lang}
                 analytic_tag_ids = []
                 for line in order.order_line:
-                    analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in
-                                        line.analytic_tag_ids.filtered(lambda at: self.period_start < at.date <=
-                                                                                  self.period_end)]
+                    analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.analytic_tag_ids]
 
                 so_line_values = self._prepare_so_line(order, analytic_tag_ids, tax_ids, amount)
                 so_line = sale_line_obj.create(so_line_values)
