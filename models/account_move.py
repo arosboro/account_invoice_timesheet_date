@@ -3,7 +3,7 @@
 
 import logging
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, tools, _
 
 _logger = logging.getLogger(__name__)
 
@@ -24,8 +24,10 @@ class AccountMoveLine(models.Model):
             sale_line_delivery = line.sale_line_ids.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and sol.product_id.service_type == 'timesheet')
             if sale_line_delivery:
                 domain = self._timesheet_domain_get_invoiced_lines(sale_line_delivery)
-                period_start = self.env.context.get('invoice_period_start')
-                period_end = self.env.context.get('invoice_period_end')
+                period_start = self.env.context.get('invoice_period_start')\
+                    .strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT)
+                period_end = self.env.context.get('invoice_period_end')\
+                    .strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT)
                 _logger.info("Period Start: %s, Period End: %s" % (period_start, period_end))
                 if period_start and period_end:
                     domain += [('date', '>=', period_start), ('date', '<=', period_end)]
