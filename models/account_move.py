@@ -23,8 +23,8 @@ class AccountMoveLine(models.Model):
             sale_line_delivery = line.sale_line_ids.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and sol.product_id.service_type == 'timesheet')
             if sale_line_delivery:
                 domain = self._timesheet_domain_get_invoiced_lines(sale_line_delivery)
-                period_start = vals_list.get('period_start')
-                period_end = vals_list.get(period_end)
+                period_start = vals_list.get('period_start', False)
+                period_end = vals_list.get('period_end', False)
                 if period_start and period_end:
                     domain += [('date', '>=', period_start), ('date', '<=', period_end)]
                 timesheets = self.env['account.analytic.line'].search(domain).sudo()
