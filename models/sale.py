@@ -11,7 +11,7 @@ from odoo.tools import float_is_zero, float_compare
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-def _create_invoices(self, grouped=False, final=False):
+def _create_invoices_for_period(self, grouped=False, final=False):
     """
     Create the invoice associated to the SO.
     :param grouped: if True, invoices are grouped by SO id. If False, invoices are grouped by

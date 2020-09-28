@@ -41,7 +41,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
         if self.advance_payment_method == 'delivered':
             sale_orders.with_context(invoice_period_start=self.period_start, invoice_period_end=self.period_end) \
-                ._create_invoices(final=self.deduct_down_payments)
+                ._create_invoices_for_period(final=self.deduct_down_payments)
         else:
             # Create deposit product if necessary
             if not self.product_id:
