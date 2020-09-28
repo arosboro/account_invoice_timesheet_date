@@ -28,9 +28,9 @@ class AccountMoveLine(models.Model):
                     .strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT)
                 period_end = self.env.context.get('invoice_period_end')\
                     .strftime(tools.misc.DEFAULT_SERVER_DATETIME_FORMAT)
-                _logger.info("Period Start: %s, Period End: %s" % (period_start, period_end))
                 if period_start and period_end:
-                    domain += [('date', '>=', period_start), ('date', '<=', period_end)]
+                    _logger.info("Period Start: %s, Period End: %s" % (period_start, period_end))
+                    domain += ['&', ('date', '>=', period_start), ('date', '<=', period_end)]
                 _logger.info(domain)
                 timesheets = self.env['account.analytic.line'].search(domain).sudo()
                 timesheets.write({
