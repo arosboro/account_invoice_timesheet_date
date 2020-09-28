@@ -33,6 +33,7 @@ class AccountMoveLine(models.Model):
                     domain += ['&', ('date', '>=', period_start), ('date', '<=', period_end)]
                 _logger.info(domain)
                 timesheets = self.env['account.analytic.line'].search(domain).sudo()
+                _logger.info("%s timesheets" % len(timesheets))
                 timesheets.write({
                     'timesheet_invoice_id': line.move_id.id,
                 })
