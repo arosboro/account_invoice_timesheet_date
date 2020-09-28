@@ -39,6 +39,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
     def create_invoices(self):
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
 
+        _logger.info("Period Start: %s, Period End: %s" % (self.period_start, self.period_end))
         if self.advance_payment_method == 'delivered':
             sale_orders.with_context(invoice_period_start=self.period_start, invoice_period_end=self.period_end) \
                 ._create_invoices_for_period(final=self.deduct_down_payments)

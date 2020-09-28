@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from odoo import api, fields, models, _
 
+_logger = logging.getLogger(__name__)
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
@@ -23,6 +26,7 @@ class AccountMoveLine(models.Model):
                 domain = self._timesheet_domain_get_invoiced_lines(sale_line_delivery)
                 period_start = self.env.context.get('invoice_period_start')
                 period_end = self.env.context.get('invoice_period_end')
+                _logger.info("Period Start: %s, Period End: %s" % (period_start, period_end))
                 if period_start and period_end:
                     domain += [('date', '>=', period_start), ('date', '<=', period_end)]
                 timesheets = self.env['account.analytic.line'].search(domain).sudo()
