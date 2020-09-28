@@ -3,11 +3,15 @@
 
 from odoo import api, fields, models, _
 
-class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+
+class AccountMove(models.Model):
+    _inherit = 'account.move'
 
     period_start = fields.Datetime()
     period_end = fields.Datetime()
+
+class AccountMoveLine(models.Model):
+    _inherit = 'account.move.line'
 
     @api.model_create_multi
     def create(self, vals_list):
